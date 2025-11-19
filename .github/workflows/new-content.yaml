@@ -20,7 +20,7 @@ jobs:
         run: |
           set -x
           cat "${GITHUB_EVENT_PATH}"
-          body=$(jq -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Content\\n\\n).*(?=\\n\\n### Link)')
+          body=$(jq -a -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Content\\n\\n).*(?=\\n\\n### Link)')
           echo $body
 
           # 280 characters for the X limit
@@ -60,9 +60,9 @@ jobs:
           number=$(jq -r '.issue.number' ${GITHUB_EVENT_PATH})
 
           # Extract the body (what's between Content and Link)
-          body=$(jq -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Content\\n\\n).*(?=\\n\\n### Link)')
+          body=$(jq -a -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Content\\n\\n).*(?=\\n\\n### Link)')
           # Extract the link (what's between Link and the last linefeed)
-          link=$(jq -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Link\\n\\n).*(?=\\n)')
+          link=$(jq -a -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Link\\n\\n).*(?=\")')
 
           # Inject the issue author and the number of the issue into the GITHUB_OUTPUT
           # to be later reused.
