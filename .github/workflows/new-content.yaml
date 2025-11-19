@@ -73,9 +73,9 @@ jobs:
           # The title, the content and the label of the issue will be archived in the 'published' folder
           jq -r '.issue.title' "${GITHUB_EVENT_PATH}" > ./published/"${number}-${user}.md"
           echo >> ./published/"${number}-${user}.md"
-          echo "${body}" "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
+          echo "${body}" >> ./published/"${number}-${user}.md"
           echo >> ./published/"${number}-${user}.md"
-          echo "${link}" "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
+          echo "${link}" >> ./published/"${number}-${user}.md"
           echo >> ./published/"${number}-${user}.md"
           jq -r '[ .issue.labels[] | select(.name != "content") | .name ] | join(", ")' "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
 
