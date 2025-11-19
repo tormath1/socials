@@ -18,11 +18,13 @@ jobs:
     steps:
       - name: Check for content length
         run: |
-          # the limit is 293:
-          #   280 characters for the X limit
-          # + 13 characters offset for the "### Content\n\n" string added by the GitHub form
-          # = 293 for the limit
-          above_limit=$(jq -r '.issue.body | length > 293' "${GITHUB_EVENT_PATH}")
+          body=$(jq -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Content\\n\\n).*(?=\\n\\n### Link)')
+
+          # 280 characters for the X limit
+          above_limit=false
+          if [ ${#body} -ge 280 ]; then
+            above_limit=true
+          fi
 
           if [ "$above_limit" = true ]; then
             # comment on the issue that we are above the limit.
@@ -54,6 +56,11 @@ jobs:
           user=$(jq -r '.issue.user.login' ${GITHUB_EVENT_PATH})
           number=$(jq -r '.issue.number' ${GITHUB_EVENT_PATH})
 
+          # Extract the body (what's between Content and Link)
+          body=$(jq -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Content\\n\\n).*(?=\\n\\n### Link)')
+          # Extract the link (what's between Link and the last linefeed)
+          link=$(jq -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Link\\n\\n).*(?=\\n)')
+
           # Inject the issue author and the number of the issue into the GITHUB_OUTPUT
           # to be later reused.
           echo "user=${user}" >> "${GITHUB_OUTPUT}"
@@ -63,9 +70,9 @@ jobs:
           # The title, the content and the label of the issue will be archived in the 'published' folder
           jq -r '.issue.title' "${GITHUB_EVENT_PATH}" > ./published/"${number}-${user}.md"
           echo >> ./published/"${number}-${user}.md"
-          jq -r '.issue.body' "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
+          echo "${body}" "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
           echo >> ./published/"${number}-${user}.md"
-          jq -r '.issue.link' "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
+          echo "${link}" "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
           echo >> ./published/"${number}-${user}.md"
           jq -r '[ .issue.labels[] | select(.name != "content") | .name ] | join(", ")' "${GITHUB_EVENT_PATH}" >> ./published/"${number}-${user}.md"
 
