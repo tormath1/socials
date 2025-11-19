@@ -18,7 +18,10 @@ jobs:
     steps:
       - name: Check for content length
         run: |
+          set -x
+          cat "${GITHUB_EVENT_PATH}"
           body=$(jq -r '.issue.body' "${GITHUB_EVENT_PATH}" | grep -o -P '(?<=Content\\n\\n).*(?=\\n\\n### Link)')
+          echo $body
 
           # 280 characters for the X limit
           above_limit=false
